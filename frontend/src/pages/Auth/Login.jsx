@@ -32,14 +32,15 @@ const Login = () => {
     try {
       const response = await login(form);
 
-      const accessToken = response.data.data.access_token;
-      localStorage.setItem("accessToken", accessToken);
+      const { access_token, refresh_token, user } = response.data.data;
 
-      const user = response.data.data.user;
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("refreshToken", refresh_token);
       localStorage.setItem("user", JSON.stringify(user));
+
       navigate("/dashboard");
     } catch (err) {
-      setMessage(err.response?.data?.message || "Login gagal.");
+      setMessage(err.response?.data?.message || "Login failed.");
     }
   };
 

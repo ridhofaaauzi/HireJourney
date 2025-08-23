@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Validation\ValidationException;
 use Exception;
@@ -80,16 +81,18 @@ class AuthController extends Controller
         }
     }
 
-    public function refreshToken(Request $request)
+    public function refreshToken($request)
     {
         try {
             $data = $this->authService->refreshToken($request);
-
-            return response()->json($data, $data['success'] ? 200 : 401);
-        } catch (Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Failed to refresh token: ' . $e->getMessage(),
+                $data,
+                $data["success"] ? 200 : 400
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "success" => false,
+                "message" => "Failed to refresh token: " . $e->getMessage(),
             ], 500);
         }
     }

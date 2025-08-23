@@ -24,7 +24,13 @@ const Edit = () => {
         email: user.email,
       }));
     } catch (error) {
-      toast.error("Failed to fetch user data!", error);
+      if (error.response?.status === 401) {
+        toast.error("Session expired, please login again!");
+        localStorage.clear();
+        window.location.href = "/";
+      } else {
+        toast.error("Failed to fetch user data!");
+      }
     } finally {
       setLoading(false);
     }
@@ -72,9 +78,13 @@ const Edit = () => {
     } catch (error) {
       if (error.response?.status === 422) {
         setErrors(error.response.data.errors);
-        Object.values(error.response.data.errors).forEach((errs) => {
-          toast.error(errs[0]);
-        });
+        Object.values(error.response.data.errors).forEach((errs) =>
+          toast.error(errs[0])
+        );
+      } else if (error.response?.status === 401) {
+        toast.error("Session expired, please login again!");
+        localStorage.clear();
+        window.location.href = "/";
       } else {
         toast.error(
           error.response?.data?.message || "Failed to update profile!"
@@ -93,6 +103,7 @@ const Edit = () => {
           <p className="text-gray-500">Loading profile...</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
             <div>
               <label className="block mb-1">Name</label>
               <input
@@ -108,6 +119,7 @@ const Edit = () => {
               )}
             </div>
 
+            {/* Email */}
             <div>
               <label className="block mb-1">Email</label>
               <input
@@ -124,6 +136,7 @@ const Edit = () => {
               )}
             </div>
 
+            {/* Password */}
             <div>
               <label className="block mb-1">Password</label>
               <input
@@ -143,6 +156,7 @@ const Edit = () => {
               )}
             </div>
 
+            {/* Confirm Password */}
             <div>
               <label className="block mb-1">Confirm Password</label>
               <input

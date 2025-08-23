@@ -69,25 +69,31 @@ class AuthService
     public function refreshToken($request)
     {
         try {
-            $user = $request->user();
+            $refreshToken = $request->input("refresh_token");
 
-            if (!$user) {
-                throw new Exception('User not authenticated');
+            if (!$refreshToken) {
+                throw new Exception("Refresh token is required");
             }
 
-            $user->currentAccessToken()->delete();
+            $user = User::where("refresh_token", hash("sha256", $refreshToken))->first();
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            if (!$user) {
+                throw new  Exception("Invalid refresh token");
+            }
+
+            $user->tokens()->delete();
+
+            $accessToken = $user->createToken("auth_token", [], now()->addMinutes(15))->plainTextToken;
 
             return [
-                'success' => true,
-                'token'   => $token,
-                'message' => 'Token refreshed successfully'
+                "success" => true,
+                "access_token" => $accessToken,
+                "message" => "Token refreshed successfully"
             ];
         } catch (Exception $e) {
             return [
-                'success' => false,
-                'message' => 'Refresh token failed: ' . $e->getMessage()
+                "success" => false,
+                "message" => "Refresh token failed: " . $e->getMessage()
             ];
         }
     }

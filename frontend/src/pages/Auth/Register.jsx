@@ -44,15 +44,22 @@ const Register = () => {
     try {
       await register(form);
 
-      toast.success("Registration Successfully!", { autoClose: 2000 });
+      toast.success("Registration successful!", { autoClose: 2000 });
 
       setErrors({});
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/dashboard");
       }, 2000);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed");
+      if (error.response?.status === 422) {
+        setErrors(error.response.data.errors || {});
+        Object.values(error.response.data.errors || {}).forEach((errs) =>
+          toast.error(errs[0])
+        );
+      } else {
+        toast.error(error.response?.data?.message || "Registration failed");
+      }
     }
   };
 
@@ -62,7 +69,6 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Register
         </h2>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

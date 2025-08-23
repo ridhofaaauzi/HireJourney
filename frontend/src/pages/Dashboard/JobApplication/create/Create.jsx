@@ -16,9 +16,7 @@ const Create = ({ onClose }) => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
-    }
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const validateForm = () => {
@@ -50,24 +48,28 @@ const Create = ({ onClose }) => {
         appliedAt = date.toISOString().slice(0, 19).replace("T", " ");
       }
 
-      const payload = {
-        ...form,
-        applied_at: appliedAt,
-      };
+      const payload = { ...form, applied_at: appliedAt };
 
       await JobApplicationService.create(payload);
+
       toast.success("Job successfully added!");
       onClose();
     } catch (error) {
       console.error("Error details:", error);
 
+      if (error.message === "Unauthenticated." || error.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        window.location.href = "/";
+        return;
+      }
+
       if (error.response?.status === 422) {
         const serverErrors = error.response.data.errors;
         setErrors(serverErrors);
         const firstErrorKey = Object.keys(serverErrors)[0];
-        if (firstErrorKey) {
-          toast.error(serverErrors[firstErrorKey][0]);
-        }
+        if (firstErrorKey) toast.error(serverErrors[firstErrorKey][0]);
       } else {
         toast.error(error.response?.data?.message || "Failed to add job!");
       }

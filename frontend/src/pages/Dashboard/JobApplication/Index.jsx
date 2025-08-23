@@ -19,7 +19,14 @@ const Index = () => {
       const data = await JobApplicationService.getAll();
       setJobs(data);
     } catch (error) {
-      toast.error("Failed to retrieve job data!", error);
+      if (error.message === "Unauthenticated." || error.status === 401) {
+        toast.error("Your session has expired, please login again.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/";
+      } else {
+        toast.error("Failed to retrieve job data!");
+      }
     } finally {
       setLoading(false);
     }
@@ -36,7 +43,14 @@ const Index = () => {
       toast.success("Job successfully deleted!");
       fetchJobs();
     } catch (error) {
-      toast.error("Failed to delete job!", error);
+      if (error.message === "Unauthenticated." || error.status === 401) {
+        toast.error("Your session has expired, please login again.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/";
+      } else {
+        toast.error("Failed to delete job!");
+      }
     }
   };
 
