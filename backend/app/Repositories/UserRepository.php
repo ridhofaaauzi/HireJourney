@@ -41,4 +41,16 @@ class UserRepository
             throw new Exception("Failed to logout: " . $th->getMessage(), 500);
         }
     }
+
+    public function update($id, array $data)
+    {
+        $user = $this->findUserById($id);
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        $user->update($data);
+
+        return $user;
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\JobApplication;
 use App\Services\JobApplicationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class JobApplicationController extends Controller
 {
@@ -42,17 +43,23 @@ class JobApplicationController extends Controller
         }
     }
 
-    public function show($id)
+    public function statusCount(Request $request)
     {
         try {
-            $userId = Auth::id();
-            $jobApplication = $this->jobApplicationService->getById($id, $userId);
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthenticated'], 401);
+            }
 
-            return response()->json($jobApplication);
+            $counts = $this->jobApplicationService->getJobCountsForUser($user->id);
+
+            return response()->json($counts);
         } catch (\Throwable $th) {
+            Log::error('StatusCount Error: ' . $th->getMessage(), ['trace' => $th->getTraceAsString()]);
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
+
 
     public function update(JobApplicationRequest $request, $id)
     {

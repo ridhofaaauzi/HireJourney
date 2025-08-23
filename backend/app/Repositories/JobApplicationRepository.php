@@ -31,4 +31,13 @@ class JobApplicationRepository
     {
         return $jobApplication->delete();
     }
+
+    public function countByStatusForUser($userId): array
+    {
+        return JobApplication::where('user_id', $userId)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+    }
 }

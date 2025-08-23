@@ -24,7 +24,7 @@ class JobApplicationService
         $jobApplication = $this->jobApplicationRepository->findById($id, $userId);
 
         if (!$jobApplication) {
-            throw new Exception("Job application not found");
+            throw new Exception("Job application not found", 404);
         }
 
         return $jobApplication;
@@ -46,5 +46,19 @@ class JobApplicationService
     {
         $jobApplication = $this->getById($id, $userId);
         return $this->jobApplicationRepository->delete($jobApplication);
+    }
+
+    public function getJobCountsForUser($userId)
+    {
+        $counts = $this->jobApplicationRepository->countByStatusForUser($userId);
+
+        $allStatuses = ['Applied', 'Interview', 'Offer', 'Rejected'];
+        foreach ($allStatuses as $status) {
+            if (!isset($counts[$status])) {
+                $counts[$status] = 0;
+            }
+        }
+
+        return $counts;
     }
 }
