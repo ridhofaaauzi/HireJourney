@@ -46,22 +46,22 @@ export const JobProvider = ({ children }) => {
     }
   };
 
-  const updateJob = async (id, data) => {
+  const updateJob = async (id, data, page = 1) => {
     try {
       const res = await api.put(`/job-applications/${id}`, data);
       toast.success("Job updated successfully!");
-      getAllJobs();
+      getAllJobs(page);
       return res.data;
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update job!");
     }
   };
 
-  const deleteJob = async (id) => {
+  const deleteJob = async (id, page = 1) => {
     try {
       await api.delete(`/job-applications/${id}`);
       toast.success("Job deleted successfully!");
-      getAllJobs();
+      getAllJobs(page);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete job!");
     }

@@ -15,7 +15,6 @@ const Index = () => {
     modalCreate,
     modalEdit,
     currentJob,
-    getAllJobs,
     page,
     setPage,
     setModalCreate,
@@ -44,7 +43,7 @@ const Index = () => {
 
   const handleDelete = async () => {
     if (jobToDelete) {
-      await deleteJob(jobToDelete.id);
+      await deleteJob(jobToDelete.id, page);
       setModalDelete(false);
       setJobToDelete(null);
     }
@@ -155,7 +154,11 @@ const Index = () => {
 
       {modalCreate && <Create onClose={() => setModalCreate(false)} />}
       {modalEdit && currentJob && (
-        <Edit job={currentJob} onClose={() => setModalEdit(false)} />
+        <Edit
+          job={currentJob}
+          page={page}
+          onClose={() => setModalEdit(false)}
+        />
       )}
       <ModalConfirm
         isOpen={modalDelete}
