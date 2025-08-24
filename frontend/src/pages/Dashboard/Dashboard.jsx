@@ -1,30 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Layout from "../../layouts/Layout";
-import JobApplicationService from "../../services/JobApplicationService";
+import { useJobContext } from "../../context/JobApplication/JobContext";
 import { toast } from "react-toastify";
 
 const Dashboard = () => {
-  const [jobCounts, setJobCounts] = useState({});
-  const [loading, setLoading] = useState(true);
-
-  const fetchJobsCount = async () => {
-    setLoading(true);
-    try {
-      const data = await JobApplicationService.getStatusCount();
-      setJobCounts(data);
-    } catch (error) {
-      toast.error("Failed to retrieve job data!");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { jobCounts, getStatusCount, loading } = useJobContext();
 
   useEffect(() => {
-    fetchJobsCount();
+    const fetchData = async () => {
+      try {
+        await getStatusCount();
+      } catch (error) {
+        toast.error("Failed to retrieve job data!");
+        console.error(error);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const isEmpty = Object.keys(jobCounts).length === 0;
+  const isEmpty = !jobCounts || Object.keys(jobCounts).length === 0;
 
   const getStatusColor = (status) => {
     switch (status) {

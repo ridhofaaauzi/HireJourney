@@ -1,27 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../services/AuthService";
+import { useAuth } from "../context/Auth/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
-  );
+  const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    const handleUserUpdate = () => {
-      const newUser = JSON.parse(localStorage.getItem("user"));
-      setUser(newUser);
-    };
-
-    window.addEventListener("userUpdated", handleUserUpdate);
-
-    return () => {
-      window.removeEventListener("userUpdated", handleUserUpdate);
-    };
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -30,9 +15,7 @@ const Navbar = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = async () => {

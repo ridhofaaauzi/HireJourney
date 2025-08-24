@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { logout } from "../services/AuthService";
+import { useAuth } from "../context/Auth/AuthContext";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -21,11 +22,13 @@ const Sidebar = () => {
           &#9776;
         </button>
       </div>
+
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 z-40"
           onClick={() => setIsOpen(false)}></div>
       )}
+
       <aside
         className={`fixed top-0 left-0 h-full w-64 bg-white shadow-md flex flex-col z-50 transform transition-transform duration-300
         ${
@@ -39,6 +42,7 @@ const Sidebar = () => {
             &times;
           </button>
         </div>
+
         <nav className="p-4 flex-1">
           <ul className="space-y-2">
             <li>

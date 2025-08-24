@@ -1,67 +1,10 @@
-import React, { useState } from "react";
-import { register } from "../../services/AuthService";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import React from "react";
+import { Link } from "react-router-dom";
+import useRegister from "../../hooks/Auth/UseRegister";
 
 const Register = () => {
-  const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    password_confirmation: "",
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!form.name.trim()) newErrors.name = "Name is required";
-    if (!form.email.trim()) newErrors.email = "Email is required";
-    if (!form.password.trim()) newErrors.password = "Password is required";
-    if (!form.password_confirmation.trim())
-      newErrors.password_confirmation = "Confirm Password is required";
-    else if (form.password !== form.password_confirmation)
-      newErrors.password_confirmation = "Passwords do not match";
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    try {
-      await register(form);
-
-      toast.success("Registration successful!", { autoClose: 2000 });
-
-      setErrors({});
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
-    } catch (error) {
-      if (error.response?.status === 422) {
-        setErrors(error.response.data.errors || {});
-        Object.values(error.response.data.errors || {}).forEach((errs) =>
-          toast.error(errs[0])
-        );
-      } else {
-        toast.error(error.response?.data?.message || "Registration failed");
-      }
-    }
-  };
+  const { formData, handleChange, handleSubmit, loading, errors } =
+    useRegister();
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -78,7 +21,7 @@ const Register = () => {
               type="text"
               name="name"
               placeholder="Enter your name"
-              value={form.name}
+              value={formData.name}
               onChange={handleChange}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                 errors.name
@@ -87,7 +30,7 @@ const Register = () => {
               }`}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.name[0]}</p>
             )}
           </div>
           <div>
@@ -98,7 +41,7 @@ const Register = () => {
               type="email"
               name="email"
               placeholder="Enter your email"
-              value={form.email}
+              value={formData.email}
               onChange={handleChange}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                 errors.email
@@ -107,7 +50,7 @@ const Register = () => {
               }`}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>
             )}
           </div>
           <div>
@@ -118,7 +61,7 @@ const Register = () => {
               type="password"
               name="password"
               placeholder="Enter your password"
-              value={form.password}
+              value={formData.password}
               onChange={handleChange}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                 errors.password
@@ -127,7 +70,7 @@ const Register = () => {
               }`}
             />
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.password[0]}</p>
             )}
           </div>
           <div>
@@ -138,7 +81,7 @@ const Register = () => {
               type="password"
               name="password_confirmation"
               placeholder="Confirm your password"
-              value={form.password_confirmation}
+              value={formData.password_confirmation}
               onChange={handleChange}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                 errors.password_confirmation
@@ -148,15 +91,14 @@ const Register = () => {
             />
             {errors.password_confirmation && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.password_confirmation}
+                {errors.password_confirmation[0]}
               </p>
             )}
           </div>
-
           <button
             type="submit"
             className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 rounded-lg shadow-md transition duration-200">
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 

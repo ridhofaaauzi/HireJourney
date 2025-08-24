@@ -1,58 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Layout from "../../../layouts/Layout";
-import JobApplicationService from "../../../services/JobApplicationService";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Create from "./create/Create";
-import Edit from "./edit/Edit";
+import useJobs from "../../../hooks/JobApplication/UseJobs";
+import Create from "../JobApplication/create/Create";
+import Edit from "../JobApplication/edit/Edit";
+import ModalConfirm from "./modal/ModalConfirm";
 
 const Index = () => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [modalCreate, setModalCreate] = useState(false);
-  const [modalEdit, setModalEdit] = useState(false);
-  const [currentJob, setCurrentJob] = useState(null);
+  const {
+    jobs,
+    loading,
+    modalCreate,
+    modalEdit,
+    currentJob,
+    setModalCreate,
+    setModalEdit,
+    setCurrentJob,
+    deleteJob,
+  } = useJobs();
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const data = await JobApplicationService.getAll();
-      setJobs(data);
-    } catch (error) {
-      if (error.message === "Unauthenticated." || error.status === 401) {
-        toast.error("Your session has expired, please login again.");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/";
-      } else {
-        toast.error("Failed to retrieve job data!");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this job?")) return;
-    try {
-      await JobApplicationService.delete(id);
-      toast.success("Job successfully deleted!");
-      fetchJobs();
-    } catch (error) {
-      if (error.message === "Unauthenticated." || error.status === 401) {
-        toast.error("Your session has expired, please login again.");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/";
-      } else {
-        toast.error("Failed to delete job!");
-      }
-    }
-  };
+  const [modalDelete, setModalDelete] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -66,6 +35,14 @@ const Index = () => {
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleDelete = async () => {
+    if (jobToDelete) {
+      await deleteJob(jobToDelete.id);
+      setModalDelete(false);
+      setJobToDelete(null);
     }
   };
 
@@ -135,7 +112,10 @@ const Index = () => {
                       </button>
                       <button
                         className="bg-red-600 text-white px-3 py-1 rounded-lg shadow hover:bg-red-700 transition"
-                        onClick={() => handleDelete(job.id)}>
+                        onClick={() => {
+                          setJobToDelete(job);
+                          setModalDelete(true);
+                        }}>
                         Delete
                       </button>
                     </td>
@@ -146,23 +126,17 @@ const Index = () => {
           </div>
         )}
       </div>
-      {modalCreate && (
-        <Create
-          onClose={() => {
-            setModalCreate(false);
-            fetchJobs();
-          }}
-        />
-      )}
+
+      {modalCreate && <Create onClose={() => setModalCreate(false)} />}
       {modalEdit && currentJob && (
-        <Edit
-          job={currentJob}
-          onClose={() => {
-            setModalEdit(false);
-            fetchJobs();
-          }}
-        />
+        <Edit job={currentJob} onClose={() => setModalEdit(false)} />
       )}
+      <ModalConfirm
+        isOpen={modalDelete}
+        job={jobToDelete}
+        onCancel={() => setModalDelete(false)}
+        onConfirm={handleDelete}
+      />
     </Layout>
   );
 };
