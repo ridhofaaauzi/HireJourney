@@ -11,9 +11,13 @@ const Index = () => {
   const {
     jobs,
     loading,
+    pagination,
     modalCreate,
     modalEdit,
     currentJob,
+    getAllJobs,
+    page,
+    setPage,
     setModalCreate,
     setModalEdit,
     setCurrentJob,
@@ -85,7 +89,10 @@ const Index = () => {
                   <tr
                     key={job.id}
                     className="border-b hover:bg-gray-50 transition">
-                    <td className="px-6 py-4">{index + 1}</td>
+                    <td className="px-6 py-4">
+                      {(pagination.current_page - 1) * pagination.per_page +
+                        (index + 1)}
+                    </td>
                     <td className="px-6 py-4 font-medium text-gray-900">
                       {job.company_name}
                     </td>
@@ -123,6 +130,25 @@ const Index = () => {
                 ))}
               </tbody>
             </table>
+            <div className="flex justify-between items-center mt-4">
+              <button
+                disabled={pagination.current_page === 1}
+                onClick={() => setPage(page - 1)}
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50">
+                Prev
+              </button>
+
+              <span>
+                Page {pagination.current_page} of {pagination.last_page}
+              </span>
+
+              <button
+                disabled={pagination.current_page === pagination.last_page}
+                onClick={() => setPage(page + 1)}
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50">
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

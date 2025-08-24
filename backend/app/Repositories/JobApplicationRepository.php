@@ -6,14 +6,19 @@ use App\Models\JobApplication;
 
 class JobApplicationRepository
 {
-    public function getAllByUser($userId)
+    public function getAllByUser($userId, $perPage = 5)
     {
-        return JobApplication::where('user_id', $userId)->get();
+        return JobApplication::with('user')
+            ->where('user_id', $userId)
+            ->paginate($perPage);
     }
 
     public function findById($id, $userId)
     {
-        return JobApplication::where('id', $id)->where('user_id', $userId)->first();
+        return JobApplication::with('user')
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->first();
     }
 
     public function create(array $data)

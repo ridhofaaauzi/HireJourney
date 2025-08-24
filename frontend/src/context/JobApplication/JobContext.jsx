@@ -6,14 +6,21 @@ const JobContext = createContext();
 
 export const JobProvider = ({ children }) => {
   const [jobs, setJobs] = useState([]);
+  const [pagination, setPagination] = useState({});
   const [jobCounts, setJobCounts] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const getAllJobs = async () => {
+  const getAllJobs = async (page = 1) => {
     setLoading(true);
     try {
-      const res = await api.get("/job-applications");
-      setJobs(res.data);
+      const res = await api.get(`/job-applications?page=${page}`);
+      setJobs(res.data.data);
+      setPagination({
+        current_page: res.data.current_page,
+        last_page: res.data.last_page,
+        total: res.data.total,
+        per_page: res.data.per_page,
+      });
       return res.data;
     } catch (error) {
       if (error.response?.status === 401) {
@@ -78,6 +85,7 @@ export const JobProvider = ({ children }) => {
       value={{
         jobs,
         jobCounts,
+        pagination,
         loading,
         getAllJobs,
         createJob,
